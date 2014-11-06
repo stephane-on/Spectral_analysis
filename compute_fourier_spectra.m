@@ -2,7 +2,7 @@ function compute_fourier_spectra
 clear
 format long
 close all
-addpath(genpath('~/octave'));
+addpath(genpath('~/octave'),genpath('~/prog/octave'));
 
 pname=uigetdir('/home/stephane/DATA/ON/Earthquakes','Select an event directory (which includes spectra/ sub-directory):');
 pname=strrep(strcat(pname,'/'),'//','/');
@@ -38,7 +38,7 @@ for i=1:length(info_peaks_t{1,1})
     w2=0.9999;
     clear B A data_filter
     [B,A] = butter(4,[w1 w2]);
-    data_filter=filter(B,A,data);
+    data_filter=filtfilt(B,A,data);
     tnbeg=info_peaks_t{1,4}(i);
     tnend=info_peaks_t{1,5}(i);
     tpbeg=info_peaks_t{1,6}(i);

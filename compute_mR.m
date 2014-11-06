@@ -2,7 +2,7 @@ function compute_mR(out_dir_base)
 format long
 %  clear
 close all
-addpath(genpath('~/octave'));
+addpath(genpath('~/octave'),genpath('~/prog/octave'));
 
 [fname,pname]=uigetfile('list_*.txt','Select a list of filenames for one event','/home/stephane/DATA/ON/Earthquakes/');
 % locate final dir name within the path
@@ -66,7 +66,7 @@ for i=1:size(list_sacfiles,1)
         [B,A] = butter(4,[w1 w2]);
         % Filter the data and converts to micro-m/s
         %------------Note modify the initial conversion test in order to get micro-meters/s
-        filtered_data=filter(B,A,S.DATA1)*conv;
+        filtered_data=filtfilt(B,A,S.DATA1)*conv;
 
          % Test on the distance mR is computed only if 200<=distance<=1500 km
          if (S.DIST >= 200 && S.DIST <= 1500)
@@ -122,8 +122,8 @@ for i=1:size(list_sacfiles,1)
              % QUESTION DO WE INTEGRATE RAW DATA AND FILTER AFTERWARDS OR DO WE INTEGRATE
              % FILTERED DATA? THE RESULTA ARE VERY DIFFERENT!
 %               displacement_data=cumtrapz(time,filtered_data);
-%               displacement_data=filter(B,A,cumtrapz(time,filtered_data));
-             displacement_data=filter(B,A,cumtrapz(time,S.DATA1*conv));
+%               displacement_data=filtfilt(B,A,cumtrapz(time,filtered_data));
+             displacement_data=filtfilt(B,A,cumtrapz(time,S.DATA1*conv));
  
              [Amax,iAmax]=max(abs(displacement_data(Np:Ns)));
              % Need to have amplitude at the max > 0 for the functions find_next_min and find_previous_min

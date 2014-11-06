@@ -2,7 +2,7 @@ function plot_ts(pname)
 %  clear
 format long
 close all
-addpath(genpath('~/octave'));
+addpath(genpath('~/octave'),genpath('~/prog/octave'));
 if nargin() ~= 1
     [fname,pname]=uigetfile('list_*.txt','Select a list of filenames for one event','/home/stephane/DATA/ON/Earthquakes/Ev_from_SC3');
 else
@@ -33,7 +33,7 @@ for i=1:length(sta_unique)
       w1=1.0/Fnyquist;
       w2=10.0/Fnyquist;
       [B,A] = butter(4,[w1 w2]);
-      data_filter1=filter(B,A,data);
+      data_filter1=filtfilt(B,A,data);
       subplot(3,1,j)
       plot(time,data_filter1)
       hold on

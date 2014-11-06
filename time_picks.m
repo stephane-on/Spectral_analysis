@@ -71,19 +71,12 @@ for i=1:size(list_sacfiles,1)
         % the amplitude seems to exponentially increase for large times
         w2=0.9999;
         [B,A] = butter(4,[w1 w2]);
-        data_filter1=filter(B,A,data);
+        data_filter1=filtfilt(B,A,data);
         %% Define windows to compute signal and noise spectra
         % Use low f for filter =1 Hz, with 0.1, the Husid plot is not good
         
         if ~isempty(info_peaks_t)
            % Initialization to avoid the case where the filename is not found in info_peaks_t
-           %tnbeg=1.0;
-           %tnend=1.0;
-           %tpbeg=1.0;
-           %tpend=1.0;
-           %tsbeg=1.0;
-           %tsend=1.0;
-           %durationS2=1.0;
            [tnbeg,tnend,tpbeg,tpend,tsbeg,tsend,durationS2]=get_windows(time,data_filter1,S.B,S.A,S.T0,S.DELTA,S.DIST);
            for j=1:length(info_peaks_t{1:1})
                if strcmp(sacfile,char(info_peaks_t{1,3}(j)))
@@ -103,19 +96,21 @@ for i=1:size(list_sacfiles,1)
             fprintf(fid_duration,'%f %f %s %s\n',S.DIST,durationS2,S.KSTNM,sacfile);
             fclose(fid_duration);
         end
+        % Compute the time at which the amplitude drops below Amax/10
         ts_amp_max_ratio10=get_amp_max_ratio10(time,data_filter1,S.B,S.T0,S.DELTA);
         figure(2)
         clf
-        plot(time,filter(B,A,S.DATA1),'r')
+        plot(time,filtfilt(B,A,S.DATA1),'r')
         hold on
-        plot([time(ceil(tpbeg/S.DELTA)) time(ceil(tpbeg/S.DELTA))],[max(filter(B,A,S.DATA1)) min(filter(B,A,S.DATA1))],'k')
-        plot([time(ceil(tpend/S.DELTA)) time(ceil(tpend/S.DELTA))],[min(filter(B,A,S.DATA1)) max(filter(B,A,S.DATA1))],'k')
-        plot([time(ceil(tsbeg/S.DELTA)) time(ceil(tsbeg/S.DELTA))],[max(filter(B,A,S.DATA1)) min(filter(B,A,S.DATA1))],'b')
-        plot([time(ceil(tsend/S.DELTA)) time(ceil(tsend/S.DELTA))],[min(filter(B,A,S.DATA1)) max(filter(B,A,S.DATA1))],'b')
-        plot([time(ceil(tnbeg/S.DELTA)) time(ceil(tnbeg/S.DELTA))],[max(filter(B,A,S.DATA1)) min(filter(B,A,S.DATA1))],'g')
-        plot([time(floor(tnend/S.DELTA)) time(floor(tnend/S.DELTA))],[min(filter(B,A,S.DATA1)) max(filter(B,A,S.DATA1))],'g')
-        plot([time(floor((S.T0-S.B+durationS2)/S.DELTA)) time(floor((S.T0-S.B+durationS2)/S.DELTA))],[min(filter(B,A,S.DATA1)) max(filter(B,A,S.DATA1))],'m')
-        plot([time(floor(ts_amp_max_ratio10/S.DELTA)) time(floor(ts_amp_max_ratio10/S.DELTA))],[min(filter(B,A,S.DATA1)) max(filter(B,A,S.DATA1))],'c')
+        plot([tnbeg tnbeg],[min(filtfilt(B,A,S.DATA1)) max(filtfilt(B,A,S.DATA1))],'g','LineWidth',2)
+        plot([tnend tnend],[min(filtfilt(B,A,S.DATA1)) max(filtfilt(B,A,S.DATA1))],'g','LineWidth',2)
+        plot([tpbeg tpbeg],[min(filtfilt(B,A,S.DATA1)) max(filtfilt(B,A,S.DATA1))],'k','LineWidth',2)
+        plot([tpend tpend],[min(filtfilt(B,A,S.DATA1)) max(filtfilt(B,A,S.DATA1))],'k','LineWidth',2)
+        plot([tsbeg tsbeg],[min(filtfilt(B,A,S.DATA1)) max(filtfilt(B,A,S.DATA1))],'b','LineWidth',2)
+        plot([tsend tsend],[min(filtfilt(B,A,S.DATA1)) max(filtfilt(B,A,S.DATA1))],'b','LineWidth',2)
+        % Plot the time at which 95% of the eneergy from the ts is included
+        plot([tsbeg+durationS2 tsbeg+durationS2],[min(filtfilt(B,A,S.DATA1)) max(filtfilt(B,A,S.DATA1))],'m','LineWidth',2)
+        plot([ts_amp_max_ratio10 ts_amp_max_ratio10],[min(filtfilt(B,A,S.DATA1)) max(filtfilt(B,A,S.DATA1))],'c','LineWidth',2)
         title([sacfile ' - ' deblank(S.KSTNM) ' - ' deblank(S.KCMPNM) ' - ' num2str(S.DIST) ' km'],'Interpreter', 'none')
         xlabel('time (s)')
         ylabel('velocity (m/s)')
@@ -127,7 +122,7 @@ for i=1:size(list_sacfiles,1)
             if strcmp(ButtonName2,'Yes') == 1
                 [x,y,button]=ginput(2);
                 xlim([x(1) x(2)])
-                data_zoom=filter(B,A,S.DATA1);
+                data_zoom=filtfilt(B,A,S.DATA1);
                 data_zoom=data_zoom(floor(x(1)/S.DELTA):ceil(x(2)/S.DELTA));
                 ylim([-max(abs(data_zoom)) max(abs(data_zoom))])
             end
