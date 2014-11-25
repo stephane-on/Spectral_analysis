@@ -76,6 +76,10 @@ for i=1:length(info_peaks_t{1,1})
     sacfile=deblank(char(info_peaks_t{1,3}(i)))
     % Need the distance, read sac file and sampling rate
     S=readsac([deblank(pname) sacfile]);
+    
+    % Do not consider cases with data identically null
+    if ~isempty(find(S.DATA1 != 0))
+    
     Fnyquist=1/(2*S.DELTA);
     %% Read the spectra
 %      A=load([pname 'spectra/' sacfile '.spc']);
@@ -190,6 +194,8 @@ for i=1:length(info_peaks_t{1,1})
     hold off    
     figure(3)
     hold off
+    
+    end
     
 end
 system(['mv ' fich_picks_f_new ' ' fich_picks_f]);
